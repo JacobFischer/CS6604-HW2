@@ -40,26 +40,6 @@ function destroy() {
     }
 };
 
-var $print;
-function print(str) {
-    if($print) {
-        $print.append(
-            $("<li>").html(str)
-        );
-    }
-};
-
-function clearPrint() {
-    if($print) {
-        $print.html("");
-        $selectedInfo.html("");
-    }
-};
-
-function formatInfo(info) {
-    return String("<h2>" + info.title + "</h2><pre>" + JSON.stringify(info.data, null, 4) + "</pre>");
-}
-
 function draw() {
     destroy();
 
@@ -85,101 +65,41 @@ function draw() {
 
 $(document).ready(function() {
     draw();
+
+    $("#next").on("click", function() {
+        clearPrint();
+        ring.token.owner.act();
+        updateNetwork();
+    });
+
     $print = $("#print");
     $cost = $("#cost");
-    var $caller = $("#caller");
-    var $callee = $("#callee");
 
-    var $userSelect = $(".user-select");
-    var htmlStr = "";
-    for(var i = 0; i < ring.hosts.length; i++) {
-        var id = ring.hosts[i].id;
-        htmlStr += '<option value="' + id + '">' + id + '</option>';
-    }
-    $userSelect.html(htmlStr);
-
-    var flip = function($flipping, $flipped) {
-        var val = $flipped.val();
-        var options = $flipping.children();
-        for(var i = 0; i < options.length; i++) {
-            var $option = $(options[i]);
-            if($option.val() !== val) {
-                $flipping.val($option.val());
-                break;
-            }
-        }
-    }
-
-    $caller.on("change", function() {
-        flip($callee, $caller);
-    });
-
-    $callee.on("change", function() {
-        flip($caller, $callee);
-    });
-
-    $useForwardingPointers = $("#use-forwarding-pointers");
-    $useForwardingPointers.on("change", function() {
-        showForwardingPointers = $useForwardingPointers.is(':checked');
-        updateNetwork();
-    });
-
-    $useReplication = $("#use-replication");
-    $useReplication.on("change", function() {
-        useReplication = $useReplication.is(':checked');
-    });
-
-    flip($callee, $caller);
-
-    $moveUserTo = $("#move-user-to")
-        .attr("max", tree.length);
-
-    $("#move-user").on("submit", function(e) { // try to move the user
-        e.preventDefault();
-        var $form = $(this);
-        var $number = $moveUserTo;
-
-        var newLocationID = parseInt($number.val());
-        var newLocation = tree[newLocationID];
-        if(!newLocation) {
-            alert("Error: invalid new location id '" + newLocationID + "'.");
-            return;
-        }
-
-        var user = usersByID[$("#move-user-id").val()];
-
-        if(!user) {
-            alert("Error: could not find the user '" + id +"'.");
-            return;
-        }
-
-        clearPrint();
-        var updates = user.move(newLocation);
-        $cost.html("Update total cost: " + updates + " updates.");
-        $number.val(0);
-        updateNetwork();
-    });
-
-    $("#locate-via-pointer").on("click", function() {
-        locate(locateViaPointers);
-    });
-
-    $("#locate-via-database").on("click", function() {
-        locate(locateViaDatabase);
-    });
-
+    var _selected = undefined;
     $selectedInfo = $("#selected-info");
+    $requestToken = $("#request-token").on("click", function() {
+        if(_selected) {
+            clearPrint();
+            print(_selected.id + " requesting token.");
+            _selected.requestToken();
+        }
+        else {
+            alert("can't request the token on nothing!");
+        }
+    });
+
     network
         .on("selectNode", function(e) {
             $selectedInfo.html("");
+            _selected = undefined;
             if(e && e.nodes && e.nodes[0] !== undefined) {
                 var id = e.nodes[0];
-                var intID = parseInt(id);
 
-                var obj = (isNaN(intID) ? usersByID[id] : tree[intID]);
-                console.log(obj);
+                var obj = ring.byID[id];
+                _selected = obj;
 
                 $selectedInfo.html(formatInfo(obj.getInfo()));
+                $requestToken.toggle(obj instanceof MobileHost);
             }
         })
         .on("deselectNode", function() {

@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- saved from url=(0057)http://visjs.org/examples/network/other/manipulation.html -->
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -8,6 +7,7 @@
 		<script type="text/javascript" src="jquery-2.2.0.min.js"></script>
 		<script type="text/javascript" src="vis.js"></script>
 		<script type="text/javascript" src="utils.js"></script>
+		<script type="text/javascript" src="token.js"></script>
 		<script type="text/javascript" src="mss.js"></script>
 		<script type="text/javascript" src="mh.js"></script>
 		<script type="text/javascript" src="ring.js"></script>
@@ -29,23 +29,13 @@
 			</div>
 		</div>
 		<div id="homework-controls">
-			<div id="parameters">
-				<label for="use-forwarding-pointers">Use Forwarding Pointers?</label><input id="use-forwarding-pointers" type="checkbox" checked/>
-				<br />
-				<label for="use-replication">Use Replication?</label><input id="use-replication" type="checkbox" checked/>
-			</div>
-			<form id="move-user">
-				<label for="move-user-to">Move <select id="move-user-id" class="user-select"></select> to:</label><input id="move-user-to" type="number" min="0" value="0"/>
-				<input type="submit"></input>
-			</form>
-			<p>User <select id="caller" class="user-select"></select> calls <select id="callee" class="user-select"></select> via:</p>
-			<button id="locate-via-pointer">Locate Via Pointer</button>
-			<button id="locate-via-database">Locate Via Database</button>
+			<button id="next">Next</button>
 		</div>
 		<ul id="print">
 		</ul>
 		<p id="cost"></p>
 		<div id="selected-info">
 		</div>
+		<button id="request-token" style="display: none;">Request Token</button>
 	</body>
 </html>
