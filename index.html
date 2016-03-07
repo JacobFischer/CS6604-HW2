@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<!-- saved from url=(0057)http://visjs.org/examples/network/other/manipulation.html -->
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<title>CS66004-HW1</title>
+
+		<script type="text/javascript" src="jquery-2.2.0.min.js"></script>
+		<script type="text/javascript" src="node.js"></script>
+		<script type="text/javascript" src="tree.js"></script>
+		<script type="text/javascript" src="user.js"></script>
+		<script type="text/javascript" src="vis.js"></script>
+		<script type="text/javascript" src="locate.js"></script>
+		<script type="text/javascript" src="main.js"></script>
+		<link href="vis.css" rel="stylesheet" type="text/css" />
+	</head>
+	<body>
+		<h1>CS6604 - HW1</h1>
+		<br />
+		<div id="mynetwork">
+			<div class="vis-network" tabindex="900" style="position: relative; overflow: hidden; touch-action: pan-y; -webkit-user-select: none; -webkit-user-drag: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); width: 100%; height: 100%;">
+				<canvas style="position: relative; touch-action: none; -webkit-user-select: none; -webkit-user-drag: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); width: 100%; height: 100%;" width="1280" height="720"></canvas>
+				<div class="vis-manipulation" style="display: none;"></div>
+				<div class="vis-edit-mode" style="display: block;">
+					<div class="vis-button vis-edit vis-edit-mode" style="touch-action: pan-y; -webkit-user-select: none; -webkit-user-drag: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);">
+					<div class="vis-label">Edit</div></div>
+				</div>
+				<div class="vis-close" style="display: none;"></div>
+			</div>
+		</div>
+		<div id="homework-controls">
+			<div id="parameters">
+				<label for="use-forwarding-pointers">Use Forwarding Pointers?</label><input id="use-forwarding-pointers" type="checkbox" checked/>
+				<br />
+				<label for="use-replication">Use Replication?</label><input id="use-replication" type="checkbox" checked/>
+			</div>
+			<form id="move-user">
+				<label for="move-user-to">Move <select id="move-user-id" class="user-select"></select> to:</label><input id="move-user-to" type="number" min="0" value="0"/>
+				<input type="submit"></input>
+			</form>
+			<p>User <select id="caller" class="user-select"></select> calls <select id="callee" class="user-select"></select> via:</p>
+			<button id="locate-via-pointer">Locate Via Pointer</button>
+			<button id="locate-via-database">Locate Via Database</button>
+		</div>
+		<ul id="print">
+		</ul>
+		<p id="cost"></p>
+		<div id="selected-info">
+		</div>
+	</body>
+</html>
