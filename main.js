@@ -17,26 +17,16 @@ var getUrlParameter = function getUrlParameter(sParam) {
     }
 };
 
-var numberOfNodes = parseInt(getUrlParameter("nodes")) || 30;
-var numberOfUsers = parseInt(getUrlParameter("users")) || 2;
+var numberOfMMSes = parseInt(getUrlParameter("mss"));
+var numberOfMHs = parseInt(getUrlParameter("mh"));
 
-var tree = generateTree(numberOfNodes);
-var users = [];
-var usersByID = {};
-for(var i = 0; i < numberOfUsers; i++) {
-    var user = new User(String.fromCharCode("A".charCodeAt(0) + i), randomElementFromArray(tree));
-    users.push(user);
-    usersByID[user.id] = user;
-}
+var ring = generateRing(numberOfMMSes, numberOfMHs);
 
 var dataForVisJS;
 
-var showForwardingPointers = true;
-var useReplication = true
-
 function updateNetwork(data) {
     if(!data) {
-        dataForVisJS = getDataForVisJS(tree, users, showForwardingPointers);
+        dataForVisJS = getDataForVisJS(ring);
         data = dataForVisJS;
     }
 
@@ -76,12 +66,6 @@ function draw() {
     // create a network
     var container = document.getElementById('mynetwork');
     var options = {
-        layout: {
-            hierarchical: {
-                direction: "UD",
-                //sortMethod: "directed",
-            }
-        },
         edges: {
             smooth: {
                 type: 'cubicBezier',
@@ -106,71 +90,10 @@ $(document).ready(function() {
     var $caller = $("#caller");
     var $callee = $("#callee");
 
-    function locate(callback) {
-        var cloned = $.extend(true, {}, dataForVisJS);
-
-        var caller = usersByID[$caller.val()];
-        var callee = usersByID[$callee.val()];
-
-        clearPrint();
-        print("Locating " + caller.id + " @ " + caller.location.id + " to " + callee.id + " @ " + callee.location.id + ".");
-
-        var replicatedLocation;
-        if(useReplication) {
-            print("Attemping to use Replication");
-            replicatedLocation = caller.replicatedLocationfor(callee);
-
-            if(!replicatedLocation) {
-                print("Caller does not have the Callee replicated");
-            }
-        }
-
-        var result;
-        if(replicatedLocation) {
-            print("Caller " + caller.id + " has Callee " + callee.id + "'s location replicated on Node " + replicatedLocation.id);
-            cloned.edges.push({
-                from: caller.location.id,
-                to: replicatedLocation.id,
-                color: "magenta",
-            });
-
-            result = {
-                hops: 1,
-                updates: true,
-            };
-        }
-        else {
-            result = callback(caller, callee, showForwardingPointers ? callee.homeLocation : callee.location, cloned);
-
-            if(showForwardingPointers) {
-                var node = callee.homeLocation;
-                while(node && !node.hasUser(callee)) {
-                    var next = node.forwardingPointers[callee.id];
-                    cloned.edges.push({
-                        from: node.id,
-                        to: next.id,
-                        color: "yellow",
-                    });
-
-                    print("&#x219d; Following Forwarding Pointer from Node " + node.id + " to Node " + next.id + " for User " + callee.id);
-                    node = next;
-                }
-            }
-        }
-
-        print("&#10003; Found the callee at Node " + callee.location.id);
-
-        $cost.html("Total cost: " + result.hops + " node hops" +(result.updates ? " + update cost" : "") + ".");
-
-        caller.called(callee);
-
-        updateNetwork(cloned);
-    };
-
     var $userSelect = $(".user-select");
     var htmlStr = "";
-    for(var i = 0; i < users.length; i++) {
-        var id = users[i].id;
+    for(var i = 0; i < ring.hosts.length; i++) {
+        var id = ring.hosts[i].id;
         htmlStr += '<option value="' + id + '">' + id + '</option>';
     }
     $userSelect.html(htmlStr);
