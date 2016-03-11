@@ -17,11 +17,11 @@ var getUrlParameter = function getUrlParameter(sParam) {
     }
 };
 
-var numberOfMMSes = parseInt(getUrlParameter("mss"));
-var numberOfMHs = parseInt(getUrlParameter("mh"));
-var numberOfProxies = parseInt(getUrlParameter("proxies"));
+var numberOfMHs = DefaultNumber(parseInt(getUrlParameter("mh")), 20);
+var numberOfMMSes = DefaultNumber(parseInt(getUrlParameter("mss")), 7);
+var numberOfProxies = DefaultNumber(parseInt(getUrlParameter("proxies")), 4);
 
-var ring = generateRing(numberOfMMSes, numberOfMHs, numberOfProxies);
+var ring = generateRing(numberOfMHs, numberOfMMSes, numberOfProxies);
 
 var dataForVisJS;
 

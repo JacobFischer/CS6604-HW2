@@ -1,9 +1,5 @@
 
-function generateRing(numStations, numHosts, numProxies) {
-    numStations = numStations || 5;
-    numHosts = numHosts || 12;
-    numProxies = numProxies || 0;
-
+function generateRing(numHosts, numStations, numProxies) {
     var proxies = [];
     for(var i = 0; i < numProxies; i++) {
         var proxy = new Proxy();
@@ -105,7 +101,7 @@ function getDataForVisJS(ring) {
             visEdges.push({
                 from: station.id,
                 to: station.proxy.id,
-                color: "yellow",
+                color: color,
             });
         }
         else {

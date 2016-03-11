@@ -1,7 +1,11 @@
 
 function randomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+};
+
+function DefaultNumber(num, def) {
+    return typeof(num) === "number" && !isNaN(num) ? num : def;
+};
 
 Array.prototype.randomElement = function() {
     return this[Math.floor(Math.random()*this.length)];
