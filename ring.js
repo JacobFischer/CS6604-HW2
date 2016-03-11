@@ -1,16 +1,31 @@
 
-function generateRing(numStations, numHosts) {
+function generateRing(numStations, numHosts, numProxies) {
     numStations = numStations || 5;
     numHosts = numHosts || 12;
+    numProxies = numProxies || 0;
+
+    var proxies = [];
+    for(var i = 0; i < numProxies; i++) {
+        var proxy = new Proxy();
+        proxies.push(proxy);
+        proxy.next = proxies[i - 1];
+    }
+    proxies[0].next = proxies[proxies.length - 1];
 
     var stations = [];
     for(var i = 0; i < numStations; i++) {
-        stations.push(new MobileSupportStation(stations[i-1]));
+        var station = new MobileSupportStation(stations[i-1]);
+
+        if(proxies.length > 0) {
+            proxies.randomElement().addStation(station);
+        }
+
+        stations.push(station);
     }
     stations[0].next = stations[stations.length - 1]; // to wrap around
 
     var token = new Token();
-    token.pass(stations[0]);
+    token.pass(proxies[0] || stations[0]);
 
     var hosts = [];
     for(var i = 0; i < numHosts; i++) {
@@ -19,6 +34,7 @@ function generateRing(numStations, numHosts) {
 
     var ring = {
         stations: stations,
+        proxies: proxies,
         hosts: hosts,
         token: token,
         byID: {},
@@ -52,6 +68,28 @@ function getDataForVisJS(ring) {
         color: "#ddd",
     });
 
+    for(var i = 0; i < ring.proxies.length; i++) {
+        var proxy = ring.proxies[i];
+
+        visNodes.push({
+            id: proxy.id,
+            label: proxy.id,
+            color: "yellow",
+        });
+
+        visEdges.push({
+            from: proxy.id,
+            to: proxy.next.id,
+            color: "yellow",
+        });
+
+        visEdges.push({
+            from: proxy.id,
+            to: "center",
+            color: "#ddd",
+        });
+    }
+
     for(var i = 0; i < ring.stations.length; i++) {
         var station = ring.stations[i];
         var color = "DeepSkyBlue";
@@ -63,17 +101,28 @@ function getDataForVisJS(ring) {
             title: formatInfo(station.getInfo()),
         });
 
-        visEdges.push({
-            from: station.id,
-            to: station.next.id,
-            color: color,
-        });
+        if(station.proxy) {
+            visEdges.push({
+                from: station.id,
+                to: station.proxy.id,
+                color: "yellow",
+            });
+        }
+        else {
+            if(station.next) {
+                visEdges.push({
+                    from: station.id,
+                    to: station.next.id,
+                    color: color,
+                });
+            }
 
-        visEdges.push({
-            from: station.id,
-            to: "center",
-            color: "#ddd",
-        });
+            visEdges.push({
+                from: station.id,
+                to: "center",
+                color: "#ddd",
+            });
+        }
     }
 
     for(var i = 0; i < ring.hosts.length; i++) {

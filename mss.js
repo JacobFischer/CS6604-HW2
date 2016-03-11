@@ -35,12 +35,18 @@ MobileSupportStation.prototype.requestToken = function(host) {
         host: host,
     };
 
+    // proxy stuff
+    if(this.proxy) {
+        this.proxy.inform(host, request);
+    }
+    // end proxy stuff
+
     // replication stuff
     var mss = this.next;
     var tempPriorities = [ this.replicate(request) ];
     while(mss !== this) {
         tempPriorities.push(mss.replicate(request));
-        mss = this.next;
+        mss = mss.next;
     }
 
     var maxPriority = Math.max.apply(Math.max, tempPriorities);
@@ -48,7 +54,7 @@ MobileSupportStation.prototype.requestToken = function(host) {
     mss = this.next;
     while(mss !== this) {
         mss.finalizeReplication(request, maxPriority);
-        mss = this.next;
+        mss = mss.next;
     }
 
     this._sortReplications();
@@ -69,9 +75,14 @@ MobileSupportStation.prototype.act = function() {
     }
     else {
         print(this.id + " has no hosts requesting the token.");
-        print(this.id + " forwarding token to successor " + this.next.id);
-
-        this.token.pass(this.next);
+        if(this.proxy) {
+            print(this.id + " returning Token to " + this.proxy.id);
+            this.token.pass(this.proxy);
+        }
+        else {
+            print(this.id + " forwarding token to successor " + this.next.id);
+            this.token.pass(this.next);
+        }
     }
 };
 

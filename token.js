@@ -7,6 +7,7 @@ function Token() {
 Token.prototype.pass = function(newOwner) {
     if(this.owner) {
         this.owner.token = undefined;
+        print("Token has been passed from " + this.owner.id + " to " + newOwner.id);
     }
 
     this.owner = newOwner;

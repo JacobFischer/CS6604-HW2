@@ -19,8 +19,9 @@ var getUrlParameter = function getUrlParameter(sParam) {
 
 var numberOfMMSes = parseInt(getUrlParameter("mss"));
 var numberOfMHs = parseInt(getUrlParameter("mh"));
+var numberOfProxies = parseInt(getUrlParameter("proxies"));
 
-var ring = generateRing(numberOfMMSes, numberOfMHs);
+var ring = generateRing(numberOfMMSes, numberOfMHs, numberOfProxies);
 
 var dataForVisJS;
 
@@ -72,11 +73,11 @@ $(document).ready(function() {
         updateNetwork();
     });
 
-    var $print = $("#print");
-    var $cost = $("#cost");
+    $print = $("#print");
+    $cost = $("#cost");
 
-    var _selected = undefined;
-    var _moving = false;
+    _selected = undefined;
+    _moving = false;
     function moveText() {
         $selectedInfo.html("Select a MSS to move <strong>" + _selected.id + "</strong> to.");
     };
