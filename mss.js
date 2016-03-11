@@ -1,13 +1,15 @@
 // Mobile Support Station
 
 _mssID = 1;
+GlobalRequests = [];
 
 function MobileSupportStation(nextStation) {
     this.id = "MSS_" + _mssID++;
     this.next = nextStation;
     this.requests = [];
+    this.replications = []; // replication based "delivery" queue
     this.hosts = {};
-}
+};
 
 MobileSupportStation.prototype.hasRequest = function(host) {
     for(var i = 0; i < this.requests.length; i++) {
@@ -29,9 +31,30 @@ MobileSupportStation.prototype.requestToken = function(host) {
         return;
     }
 
-    this.requests.push({
+    var request = {
         host: host,
-    });
+    };
+
+    // replication stuff
+    var mss = this.next;
+    var tempPriorities = [ this.replicate(request) ];
+    while(mss !== this) {
+        tempPriorities.push(mss.replicate(request));
+        mss = this.next;
+    }
+
+    var maxPriority = Math.max.apply(Math.max, tempPriorities);
+
+    mss = this.next;
+    while(mss !== this) {
+        mss.finalizeReplication(request, maxPriority);
+        mss = this.next;
+    }
+
+    this._sortReplications();
+    // end replcation stuff
+
+    this.requests.push(request);
 };
 
 MobileSupportStation.prototype.act = function() {
@@ -82,8 +105,55 @@ MobileSupportStation.prototype.joinHost = function(host, request) {
 MobileSupportStation.prototype.loseHost = function(host) {
     delete this.hosts[host.id];
 
+    // delete the request from all replications
+    var mss = this;
+    do {
+        for(var i = 0; i < mss.replications.length; i++) {
+            var replication = mss.replications[i];
+            if(replication.request.host === host) {
+                mss.replications.splice(i, 1);
+                break;
+            }
+        }
+        mss = mss.next;
+    } while(mss !== this);
+
     var index = this.hasRequest(host);
     if(index !== undefined) {
         return this.requests.splice(index, 1)[0]; // remove the request at that index and return it
     }
+};
+
+MobileSupportStation.prototype.replicate = function(request) {
+    var replication = {
+        request: request,
+        deliverable: false,
+        priority: -1,
+    };
+
+    for(var i = 0; i < this.replications.length; i++) {
+        replication.priority = Math.max(replication.priority, this.replications[i].priority);
+    }
+
+    replication.priority++;
+    return replication.priority;
+};
+
+MobileSupportStation.prototype.finalizeReplication = function(request, priority) {
+    for(var i = 0; i < this.replications.length; i++) {
+        var replication = this.replications[i];
+        if(replication.request === request) {
+            replication.priority = priority;
+            replication.deliverable = true;
+            break;
+        }
+    }
+
+    this._sortReplications();
+};
+
+MobileSupportStation.prototype._sortReplications = function(request, priority) {
+    this.replications.sort(function(a, b) {
+        return b.priority - a.priority;
+    });
 };

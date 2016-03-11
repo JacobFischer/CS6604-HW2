@@ -7,6 +7,7 @@ function MobileHost(station) {
     this.moveTo(station);
 
     this._critical = false;
+    this.totalRequests = 0; // h_count, but less stupidly named
 };
 
 MobileHost.prototype.act = function() {
@@ -26,6 +27,7 @@ MobileHost.prototype.act = function() {
 };
 
 MobileHost.prototype.requestToken = function() {
+    this.totalRequests++;
     this.station.requestToken(this);
 };
 
