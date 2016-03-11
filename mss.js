@@ -6,6 +6,7 @@ function MobileSupportStation(nextStation) {
     this.id = "MSS_" + _mssID++;
     this.next = nextStation;
     this.requests = [];
+    this.hosts = {};
 }
 
 MobileSupportStation.prototype.hasRequest = function(host) {
@@ -44,7 +45,7 @@ MobileSupportStation.prototype.act = function() {
         this.token.pass(request.host);
     }
     else {
-        print(this.id + " has not hosts requesting the token.");
+        print(this.id + " has no hosts requesting the token.");
         print(this.id + " forwarding token to successor " + this.next.id);
 
         this.token.pass(this.next);
@@ -60,8 +61,29 @@ MobileSupportStation.prototype.getInfo = function() {
     return {
         title: this.id,
         data: {
+            "Has Token": this.token ? true : undefined,
             Requests: requests,
             Successor: next.id,
+            Hosts: Object.keys(this.hosts),
         },
     };
+};
+
+// this is basically join(mh_id, req_loc) from the slides
+MobileSupportStation.prototype.joinHost = function(host, request) {
+    this.hosts[host.id] = host;
+
+    if(request) {
+        this.requests.push(request);
+    }
+
+};
+
+MobileSupportStation.prototype.loseHost = function(host) {
+    delete this.hosts[host.id];
+
+    var index = this.hasRequest(host);
+    if(index !== undefined) {
+        return this.requests.splice(index, 1)[0]; // remove the request at that index and return it
+    }
 };

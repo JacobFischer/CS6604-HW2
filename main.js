@@ -72,10 +72,20 @@ $(document).ready(function() {
         updateNetwork();
     });
 
-    $print = $("#print");
-    $cost = $("#cost");
+    var $print = $("#print");
+    var $cost = $("#cost");
 
     var _selected = undefined;
+    var _moving = false;
+    function moveText() {
+        $selectedInfo.html("Select a MSS to move <strong>" + _selected.id + "</strong> to.");
+    };
+
+    var $moveMH = $("#move-mh").on("click", function() {
+        _moving = true;
+        moveText();
+    });
+
     $selectedInfo = $("#selected-info");
     $requestToken = $("#request-token").on("click", function() {
         if(_selected) {
@@ -91,15 +101,32 @@ $(document).ready(function() {
     network
         .on("selectNode", function(e) {
             $selectedInfo.html("");
+            var prevSelected = _selected;
             _selected = undefined;
             if(e && e.nodes && e.nodes[0] !== undefined) {
                 var id = e.nodes[0];
 
                 var obj = ring.byID[id];
+
+                if(_moving) {
+                    if(obj instanceof MobileSupportStation) {
+                        prevSelected.moveTo(obj);
+                        updateNetwork();
+                        _moving = false;
+                    }
+                    else {
+                        _selected = prevSelected;
+                        moveText();
+                    }
+                    return;
+                }
+
                 _selected = obj;
 
                 $selectedInfo.html(formatInfo(obj.getInfo()));
-                $requestToken.toggle(obj instanceof MobileHost);
+                var mh = Boolean(obj instanceof MobileHost);
+                $requestToken.toggle(mh);
+                $moveMH.toggle(mh);
             }
         })
         .on("deselectNode", function() {

@@ -46,6 +46,12 @@ function getDataForVisJS(ring) {
     var visNodes = [];
     var visEdges = [];
 
+    visNodes.push({
+        id: "center",
+        label: "Fixed Network",
+        color: "#ddd",
+    });
+
     for(var i = 0; i < ring.stations.length; i++) {
         var station = ring.stations[i];
         var color = "DeepSkyBlue";
@@ -62,22 +68,11 @@ function getDataForVisJS(ring) {
             to: station.next.id,
             color: color,
         });
-    }
-
-    if(ring.token.owner) {
-        var color = "LimeGreen";
-
-        visNodes.push({
-            id: "Token",
-            label: "Token",
-            color: color,
-            title: formatInfo(ring.token.getInfo()),
-        });
 
         visEdges.push({
-            from: "Token",
-            to: ring.token.owner.id,
-            color: color,
+            from: station.id,
+            to: "center",
+            color: "#ddd",
         });
     }
 
@@ -97,6 +92,23 @@ function getDataForVisJS(ring) {
             to: host.station.id,
             color: color,
         });
+    }
+
+    for(var i = 0; i < visNodes.length; i++) {
+        var visNode = visNodes[i];
+        var obj = ring.byID[visNode.id];
+        if(obj && obj.token) {
+            visNode.color = {
+                border: "red",
+                highlight: {
+                    border: 'red'
+                },
+                background: visNode.color,
+            };
+            visNode.borderWidth = 4;
+            visNode.borderWidthSelected = 6;
+            break;
+        }
     }
 
     return {

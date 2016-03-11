@@ -4,7 +4,7 @@ _mhID = 1;
 
 function MobileHost(station) {
     this.id = "MH_" + _mhID++;
-    this.station = station;
+    this.moveTo(station);
 
     this._critical = false;
 };
@@ -33,9 +33,17 @@ MobileHost.prototype.getInfo = function() {
     return {
         title: this.id,
         data: {
+            "Has Token": this.token ? true : undefined,
             "Requested Token": this.station.hasRequest(this) !== undefined,
             MSS: this.station.id,
             "In Critical Region": this._critical,
         },
     };
+};
+
+MobileHost.prototype.moveTo = function(station) {
+    var request = this.station && this.station.loseHost(this);
+
+    this.station = station;
+    station.joinHost(this, request);
 };
