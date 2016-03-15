@@ -23,9 +23,12 @@ Proxy.prototype.act = function() {
 
     if(this.requests.length > 0) {
         var request;
-        do {
-            request = this.requests.shift();
-        } while(request.proxy !== this);
+        for(var i = 0; i < this.requests.length; i++) {
+            if(this.requests[i].proxy === this) {
+                request = this.requests[i];
+                break; // we found it
+            }
+        }
 
         print(this.id + " delivering Token to " + request.host.station.id + " where " + request.host.id + " is active.");
         this.token.pass(request.host.station);
@@ -34,6 +37,10 @@ Proxy.prototype.act = function() {
         print(this.id + " has no requests in the queue, forwarding to successor " + this.next.id);
         this.token.pass(this.next);
     }
+};
+
+Proxy.prototype.requestFullfilled = function(request) {
+    this.requests.removeElement(request);
 };
 
 Proxy.prototype.getInfo = function() {

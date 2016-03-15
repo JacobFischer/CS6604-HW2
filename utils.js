@@ -7,8 +7,22 @@ function DefaultNumber(num, def) {
     return typeof(num) === "number" && !isNaN(num) ? num : def;
 };
 
+var seed = 123896;
+function random() {
+    var x = Math.sin(seed++) * 10000;
+    return x - Math.floor(x);
+}
+
 Array.prototype.randomElement = function() {
-    return this[Math.floor(Math.random()*this.length)];
+    return this[Math.floor(random()*this.length)];
+};
+
+Array.prototype.removeElement = function(item) {
+    var index = this.indexOf(item);
+
+    if(index > -1) {
+        this.splice(index, 1);
+    }
 };
 
 $print = undefined;

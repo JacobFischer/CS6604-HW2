@@ -6,7 +6,9 @@ function generateRing(numHosts, numStations, numProxies) {
         proxies.push(proxy);
         proxy.next = proxies[i - 1];
     }
-    proxies[0].next = proxies[proxies.length - 1];
+    if(proxies[0]) {
+        proxies[0].next = proxies[proxies.length - 1];
+    }
 
     var stations = [];
     for(var i = 0; i < numStations; i++) {
@@ -125,9 +127,10 @@ function getDataForVisJS(ring) {
         var host = ring.hosts[i];
         var color = "SandyBrown";
 
+        var request = host.station.hasRequest(host);
         visNodes.push({
             id: host.id,
-            label: host.id,
+            label: host.id + (request !== undefined? " @ " + request : "") + (host.inCritical ? "!!!" : ""),
             color: color,
             title: formatInfo(host.getInfo()),
         });

@@ -17,9 +17,19 @@ var getUrlParameter = function getUrlParameter(sParam) {
     }
 };
 
-var numberOfMHs = DefaultNumber(parseInt(getUrlParameter("mh")), 20);
-var numberOfMMSes = DefaultNumber(parseInt(getUrlParameter("mss")), 7);
-var numberOfProxies = DefaultNumber(parseInt(getUrlParameter("proxies")), 4);
+var inform = getUrlParameter("inform");
+
+if(getUrlParameter("demo")) {
+    inform = true;
+    seed = 149;
+}
+
+var USE_REPLICATION = Boolean(getUrlParameter("rep"));
+
+var numberOfMHs = DefaultNumber(parseInt(getUrlParameter("mh")), inform ? 12 : 20);
+var numberOfMMSes = DefaultNumber(parseInt(getUrlParameter("mss")), inform ? 5 : 7);
+var numberOfProxies =  DefaultNumber(parseInt(getUrlParameter("proxies")), inform ? 0 : 4);
+seed = parseInt(getUrlParameter("seed")) || seed;
 
 var ring = generateRing(numberOfMHs, numberOfMMSes, numberOfProxies);
 
@@ -93,6 +103,7 @@ $(document).ready(function() {
             clearPrint();
             print(_selected.id + " requesting token.");
             _selected.requestToken();
+            updateNetwork();
         }
         else {
             alert("can't request the token on nothing!");
@@ -111,6 +122,7 @@ $(document).ready(function() {
 
                 if(_moving) {
                     if(obj instanceof MobileSupportStation) {
+                    	clearPrint();
                         prevSelected.moveTo(obj);
                         updateNetwork();
                         _moving = false;

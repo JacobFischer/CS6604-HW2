@@ -6,14 +6,14 @@ function MobileHost(station) {
     this.id = "MH_" + _mhID++;
     this.moveTo(station);
 
-    this._critical = false;
+    this.inCritical = false;
     this.totalRequests = 0; // h_count, but less stupidly named
 };
 
 MobileHost.prototype.act = function() {
     print(this.id + " has the token.");
 
-    if(this._critical) {
+    if(this.inCritical) {
         print(this.id +" has finished accessing the critical region.");
         print("Returning token to " + this.station.id);
 
@@ -23,7 +23,7 @@ MobileHost.prototype.act = function() {
         print(this.id + " has started accessing the critical region.");
     }
 
-    this._critical = !this._critical;
+    this.inCritical = !this.inCritical;
 };
 
 MobileHost.prototype.requestToken = function() {
@@ -36,16 +36,24 @@ MobileHost.prototype.getInfo = function() {
         title: this.id,
         data: {
             "Has Token": this.token ? true : undefined,
-            "Requested Token": this.station.hasRequest(this) !== undefined,
+            "Requested Token": this.hasRequestedToken(),
             MSS: this.station.id,
-            "In Critical Region": this._critical,
+            "In Critical Region": this.inCritical,
         },
     };
+};
+
+MobileHost.prototype.hasRequestedToken = function() {
+    return this.station.hasRequest(this) !== undefined;
 };
 
 MobileHost.prototype.moveTo = function(station) {
     var request = this.station && this.station.loseHost(this);
 
-    this.station = station;
+    if(this.station) {
+        print(this.id + " is moving and has request, need to inform " + this.station.id + " of move to " + station.id);
+    }
+
     station.joinHost(this, request);
+    this.station = station;
 };
