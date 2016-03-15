@@ -128,6 +128,9 @@ function getDataForVisJS(ring) {
         var color = "SandyBrown";
 
         var request = host.station.hasRequest(host);
+        if(USE_REPLICATION)  {
+            request = host.station.getReplicationPriority(host);
+        }
         visNodes.push({
             id: host.id,
             label: host.id + (request !== undefined? " @ " + request : "") + (host.inCritical ? "!!!" : ""),

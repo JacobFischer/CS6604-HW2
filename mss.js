@@ -21,6 +21,16 @@ MobileSupportStation.prototype.hasRequest = function(host) {
     }
 };
 
+MobileSupportStation.prototype.getReplicationPriority = function(host) {
+    for(var i = 0; i < this.replications.length; i++) {
+        var r = this.replications[i];
+
+        if(r.request.host === host) {
+            return r.priority;
+        }
+    }
+};
+
 MobileSupportStation.prototype.requestToken = function(host) {
     print(host.id + " has added a request to " + this.id + " and is queued at " + this.requests.length);
 
@@ -70,8 +80,8 @@ MobileSupportStation.prototype.requestToken = function(host) {
 MobileSupportStation.prototype.act = function() {
     print(this.id + " has the token.");
 
-    if(this.requests.length > 0) {
-        var request = this.requests.shift();
+    if(this.hasRequests()) {
+        var request = this.getFirstRequest();
         print(this.id + " has hosts requesting the token.");
         print(this.id + " is delivering token to " + request.host.id);
 
@@ -99,6 +109,36 @@ MobileSupportStation.prototype.act = function() {
         else {
             print(this.id + " forwarding token to successor " + this.next.id);
             this.token.pass(this.next);
+        }
+    }
+};
+
+MobileSupportStation.prototype.getFirstRequest = function() {
+    if(USE_REPLICATION) {
+        for(var i = 0; i < this.replications.length; i++) {
+            var r = this.replications[i];
+            if(this.hosts[r.request.host.id]) {
+                return r.request;
+            }
+        }
+    }
+    else {
+        return this.requests.shift();
+    }
+};
+
+MobileSupportStation.prototype.hasRequests = function() {
+    if(USE_REPLICATION) {
+        for(var i = 0; i < this.replications.length; i++) {
+            var r = this.replications[i];
+            if(this.hosts[r.request.host.id]) {
+                return true;
+            }
+        }
+    }
+    else {
+        if(this.requests.length > 0) {
+            return true;
         }
     }
 };
@@ -206,7 +246,7 @@ MobileSupportStation.prototype.finalizeReplication = function(request, priority)
 
 MobileSupportStation.prototype._sortReplications = function(request, priority) {
     this.replications.sort(function(a, b) {
-        return b.priority - a.priority;
+        return a.priority - b.priority;
     });
 };
 
